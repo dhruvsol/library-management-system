@@ -61,7 +61,7 @@ router.post('/signup', (req, res) => {
                 // now we need to check if this user exists in db or not
                 if (user) {
                     errors.push({ msg: 'User already exists in the system.'});
-                    // TODO: replace the below statements with res.redirect('/signup');
+                    // TODO: replace the below statements with res.redirect('/login');
                     res.end(`Couldn't signup. Errors - ${JSON.stringify(errors)}`);
                 } else {
                     // user does not exist in the system
@@ -137,7 +137,7 @@ router.post('/login', (req, res, next) => {
     }
 
     if (errors.length > 0) {
-        // TODO: replace below statement with res.render('loginView');
+        // TODO: replace below statement with res.redirect('/login');
         res.end(`Errors found - ${JSON.stringify(errors)}. Routing to login page again.`);
     } else {
         console.log('About to authenticate');
