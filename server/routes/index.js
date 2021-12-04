@@ -13,6 +13,7 @@ router.get('/', (req, res) => {
     // if user is authenticated, go to home page, else login page
     if (!req.isAuthenticated()) {
         // TODO: replace the below statement with res.redirect('/login');
+        res.render('pages/auth');
         res.end('Showing login page');
     } else {
         // TODO: replace below statements with res.render('homePageView');
@@ -90,6 +91,24 @@ router.post('/signup', (req, res) => {
             });
 
     }
+});
+
+/**
+ * Authenticate using google account
+ */
+router.get('/auth/google', (req, res) => {
+    console.log("request received");
+    passport.authenticate('google', { scope: ['profile', 'email']});
+});
+
+/**
+ * Callback on which the authentication result will be returned
+ */
+router.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    (req, res) => {
+        // Successful authentication
+        res.redirect('/dashboard');
 });
 
 /**

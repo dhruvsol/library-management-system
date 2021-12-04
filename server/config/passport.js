@@ -1,10 +1,14 @@
 const LocalStrategy = require('passport-local').Strategy;
+const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const bcrypt = require('bcryptjs');
 
 // load user model
 const User = require('../models/User');
+const GOOGLE_CLIENT_ID = require('../config/keys').GoogleOAuthClientID;
+const GOOGLE_CLIENT_SECRET = require('../config/keys').GoogleOAuthClientSecret;
 
 module.exports = function(passport) {
+    // setting up the local strategy
     passport.use(
         new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
             // match user
@@ -28,6 +32,21 @@ module.exports = function(passport) {
                 .catch(err => console.log(err));
         })
     );
+    
+    // setting up the google oauth2 strategy
+    
+    passport.use(
+        new GoogleStrategy({
+            clientID: GOOGLE_CLIENT_ID,
+            clientSecret: GOOGLE_CLIENT_SECRET,
+            callbackURL: 'http://localhost:5000/auth/google/callback',
+            passReqToCallback:true
+        }, (request, accessToken, refreshToken, profile, done) => {
+            return done(null, profile);
+        })
+    );
+    
+    // setting up the 
     passport.serializeUser(function(user, done) {
         done(null, user.id);
     });
