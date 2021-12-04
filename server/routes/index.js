@@ -7,7 +7,7 @@ const User = require('../models/User');
 const roles = require('../config/roles').roles;
 
 /**
- * show home page or login page depending on authentication
+ * show dashboard page or login page depending on authentication
  */
 router.get('/', (req, res) => {
     // if user is authenticated, go to home page, else login page
@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
         res.render('pages/auth');
         res.end('Showing login page');
     } else {
-        // TODO: replace below statements with res.render('homePageView');
+        // TODO: replace below statements with res.redirect('/dashboard');
         const requestBody = JSON.stringify(req.body);
         res.end(`Showing the home page here. Request contains ${requestBody}`);
     }
@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
  * show the signup page
  */
 router.get('/signup', (req, res) => {
-    // TODO: replace below statements with res.render('registerViewName');
+    // TODO: replace below statements with res.render('signupView');
     const requestBody = JSON.stringify(req.body);
     res.end(`Showing the signup page here. Request contains ${requestBody}`);
 });
@@ -52,7 +52,7 @@ router.post('/signup', (req, res) => {
     }
 
     if (errors.length > 0) {
-        // TODO: replace below statements with res.render('registerViewName');
+        // TODO: replace below statements with res.redirect('/signup');
         res.send(`Could not signup due to errors. Errors are - ${JSON.stringify(errors)}`);
     } else {
         // there are no errors in initial validation 
@@ -61,7 +61,7 @@ router.post('/signup', (req, res) => {
                 // now we need to check if this user exists in db or not
                 if (user) {
                     errors.push({ msg: 'User already exists in the system.'});
-                    // TODO: replace the below statements with res.render('registerViewName');
+                    // TODO: replace the below statements with res.redirect('/signup');
                     res.end(`Couldn't signup. Errors - ${JSON.stringify(errors)}`);
                 } else {
                     // user does not exist in the system
@@ -88,27 +88,9 @@ router.post('/signup', (req, res) => {
                         })
                     })
                 }
-            });
-
+            }
+        );
     }
-});
-
-/**
- * Authenticate using google account
- */
-router.get('/auth/google', (req, res) => {
-    console.log("request received");
-    passport.authenticate('google', { scope: ['profile', 'email']});
-});
-
-/**
- * Callback on which the authentication result will be returned
- */
-router.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login' }),
-    (req, res) => {
-        // Successful authentication
-        res.redirect('/dashboard');
 });
 
 /**
@@ -127,10 +109,10 @@ const validateEmail = (email) => {
 router.get('/login', (req, res) => {
     // TODO: if this user is already authenticated (check auth token), then redirect to home page
     if (req.isAuthenticated()) {
-        // TODO: replace the below statement with res.render('homePageView');
+        // TODO: replace the below statement with res.redirect('/dashboard');
         res.end(`User is authenticated and home page is shown`);
     } else {
-        // TODO: replace the below statement with res.render('loginPageView');
+        // TODO: replace the below statement with res.render('loginView');
         res.end(`User is not authenticated and login page is shown`);
     }
 });
@@ -155,7 +137,7 @@ router.post('/login', (req, res, next) => {
     }
 
     if (errors.length > 0) {
-        // TODO: replace below statement with res.render('loginView', { errors, email, password });
+        // TODO: replace below statement with res.render('loginView');
         res.end(`Errors found - ${JSON.stringify(errors)}. Routing to login page again.`);
     } else {
         console.log('About to authenticate');
@@ -165,5 +147,41 @@ router.post('/login', (req, res, next) => {
         })(req, res, next);
     }
 });
+
+/**
+ * Authenticate using google account
+ */
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email']}));
+
+/**
+ * Callback on which the authentication token will be returned
+ */
+router.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    (req, res) => {
+        // Successful authentication
+        res.redirect('/dashboard');
+    }
+); 
+
+/**
+ * Authenticate using github account
+ */
+router.get('/auth/github', passport.authenticate('github'));
+
+/**
+ * Callback on which the authentication token will be returned
+ */
+router.get('/auth/github/callback', 
+    passport.authenticate('github', { failureRedirect: '/login' }), 
+    (req, res) => {
+        // Successful authentication
+        res.redirect('/dashboard');
+    }
+);
+
+router.get('/dashboard', (req, res) => {
+    res.send('<h1>Dashboard</h1>');
+})
 
 module.exports = router;
